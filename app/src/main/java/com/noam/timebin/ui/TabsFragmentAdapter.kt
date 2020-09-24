@@ -1,17 +1,17 @@
 package com.noam.timebin.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.noam.timebin.MainActivity
 
-class TabsAdapter(activity: AppCompatActivity, private val itemsCount: Int) :
-    FragmentStateAdapter(activity) {
+class TabsFragmentAdapter(private val mainActivity: MainActivity, private val itemsCount: Int) :
+    FragmentStateAdapter(mainActivity) {
 
     override fun getItemCount(): Int {
         return itemsCount
     }
 
     override fun createFragment(position: Int): Fragment {
-        return TabsFragment.getInstance(position)
+        return TabsFragment.getInstance(mainActivity, position)
     }
 }

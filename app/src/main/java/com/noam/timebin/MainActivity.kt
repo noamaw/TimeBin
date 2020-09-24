@@ -5,17 +5,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.viewpager2.widget.ViewPager2
-import com.noam.timebin.ui.TabsAdapter
-import com.noam.timebin.utils.*
-import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.android.synthetic.main.service_fragment_layout.*
+import com.noam.timebin.ui.TabsFragmentAdapter
+import com.noam.timebin.utils.ACTION_REQUEST_TIME_PASSED
+import com.noam.timebin.utils.ACTION_SERVICE_TO_ACTIVITY
+import com.noam.timebin.utils.EXTRA_TIME_PASSED
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +27,7 @@ class MainActivity : AppCompatActivity() {
             when (intent.action) {
                 ACTION_SERVICE_TO_ACTIVITY -> {
                     val timePassed = intent.getLongExtra(EXTRA_TIME_PASSED, 0L)
-                    setTimerView(timePassed)
+                    listener.setTimerView(timePassed)
                 }
             }
         }
@@ -48,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setViewPager() {
         val tabsNamesArray = resources.getStringArray(R.array.tabs_names)
-        val tabsAdapter = TabsAdapter(this, tabsNamesArray.size)
+        val tabsAdapter = TabsFragmentAdapter(this, tabsNamesArray.size)
         tabsViewPager = tabs_view_pager
         tabsViewPager.adapter = tabsAdapter
         tabsPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
@@ -81,5 +80,18 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(ACTION_REQUEST_TIME_PASSED)
             sendBroadcast(intent)
         }
+    }
+
+    // Interface
+    public interface MainActivityListener {
+        fun setTimerView(timePassed : Long) {}
+    }
+
+    private class EmptyImplementationListener : MainActivityListener {}
+
+    private var listener: MainActivityListener = EmptyImplementationListener()
+
+    fun setListener(listener: MainActivityListener) {
+        this.listener = listener
     }
 }

@@ -17,7 +17,7 @@ import com.noam.timebin.utils.ACTION_STOP_SERVICE
 import com.noam.timebin.utils.convertLongToFormattedTime
 import kotlinx.android.synthetic.main.service_fragment_layout.*
 
-class ServiceFragment(activity: MainActivity) : Fragment() {
+class ServiceFragment(private val mainActivity: MainActivity) : Fragment(), MainActivity.MainActivityListener {
 
     private lateinit var actionServiceBtn : Button
     private lateinit var timerHeadTextView: TextView
@@ -29,13 +29,18 @@ class ServiceFragment(activity: MainActivity) : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mainActivity.setListener(this)
     }
 
+    override fun onStart() {
+        super.onStart()
+        initUIObjects()
+    }
     override fun onPause() {
         super.onPause()
     }
 
-    private fun setTimerView(timePassed: Long) {
+    override fun setTimerView(timePassed: Long) {
         timerHeadTextView.text = resources.getString(R.string.time_passed_headline)
         timerInfoTextView.text = convertLongToFormattedTime(timePassed)
     }
