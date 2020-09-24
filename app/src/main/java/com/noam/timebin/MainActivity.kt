@@ -83,11 +83,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Interface
-    public interface MainActivityListener {
+    interface MainActivityListener {
         fun setTimerView(timePassed : Long) {}
     }
 
-    private class EmptyImplementationListener : MainActivityListener {}
+    private class EmptyImplementationListener : MainActivityListener
 
     private var listener: MainActivityListener = EmptyImplementationListener()
 

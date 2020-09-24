@@ -5,7 +5,7 @@ import com.noam.timebin.MainActivity
 import com.noam.timebin.ui.fragments.ServiceFragment
 import com.noam.timebin.ui.fragments.TodayFragment
 
-class TabsFragment() {
+class TabsFragment {
 
     companion object {
         fun getInstance(mainActivity: MainActivity, position: Int): Fragment {

@@ -27,17 +27,10 @@ class ServiceFragment(private val mainActivity: MainActivity) : Fragment(), Main
         return inflater.inflate(R.layout.service_fragment_layout, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        mainActivity.setListener(this)
-    }
-
     override fun onStart() {
         super.onStart()
+        mainActivity.setListener(this)
         initUIObjects()
-    }
-    override fun onPause() {
-        super.onPause()
     }
 
     override fun setTimerView(timePassed: Long) {
