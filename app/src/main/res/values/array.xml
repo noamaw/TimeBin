@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="tabs_names">
+        <item>Service</item>
+        <item>Today</item>
+        <item>Week</item>
+        <item>Settings</item>
+    </array>
+</resources>

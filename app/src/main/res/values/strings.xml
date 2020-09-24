@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TimeBin</string>
+    <string name="my_string">Timer Running: </string>
+    <string name="start_service_button">start Service</string>
+    <string name="stop_service_button">stop Service</string>
+    <string name="time_passed_headline">Time passed:</string>
+</resources>
