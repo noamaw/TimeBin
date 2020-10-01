@@ -34,8 +34,10 @@ class ServiceFragment(private val mainActivity: MainActivity) : Fragment(), Main
     }
 
     override fun setTimerView(timePassed: Long) {
-        timerHeadTextView.text = resources.getString(R.string.time_passed_headline)
-        timerInfoTextView.text = convertLongToFormattedTime(timePassed)
+        if (this.isVisible) {
+            timerHeadTextView.text = resources.getString(R.string.time_passed_headline)
+            timerInfoTextView.text = convertLongToFormattedTime(timePassed)
+        }
     }
 
     private fun initUIObjects() {

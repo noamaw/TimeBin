@@ -77,7 +77,9 @@ class TimerService : Service() {
     }
 
     private fun createNewTimer(currentTime: Long) {
-        if (!runningMyTimer.isDummy()) { TimeBinApplication.addToTimers(runningMyTimer.copy()) }
+        if (!runningMyTimer.isDummy()) {
+            TimeBinApplication.addToTimers(runningMyTimer.copy())
+        }
         runningMyTimer = MyTimer(currentTime)
     }
 

@@ -17,8 +17,16 @@ class TimeBinApplication : Application() {
         var isActivityRunning : Boolean = false
 
         fun addToTimers(timer: MyTimer) {
+            timer.finish()
             timers.add(timer)
         }
 
+        fun getTimersTotalTime(): Long {
+            var totalTime = 0L
+            timers.forEach {
+                totalTime += it.calculateTimePassed()
+            }
+            return totalTime
+        }
     }
 }

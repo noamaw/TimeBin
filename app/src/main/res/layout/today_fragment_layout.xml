@@ -16,6 +16,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="center|start"
             android:layout_margin="5dp"
+            android:gravity="center"
+            android:text="@string/total_time_on_phone_today"
             android:textSize="20sp"
             />
 

@@ -12,6 +12,12 @@ data class MyTimer(
         isCurrentlyRunning = false
     }
 
+    fun finish() {
+        if (breaks.isNotEmpty()) {
+            stopTime = breaks.last().endTime
+        }
+    }
+
     fun addBreak(startTime: Long, endTime: Long) {
         breaks.add(Break(startTime, endTime))
         isCurrentlyRunning = true

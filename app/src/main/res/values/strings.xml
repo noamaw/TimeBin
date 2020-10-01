@@ -4,4 +4,5 @@
     <string name="start_service_button">start Service</string>
     <string name="stop_service_button">stop Service</string>
     <string name="time_passed_headline">Time passed:</string>
+    <string name="total_time_on_phone_today">Total time on phone today:</string>
 </resources>
