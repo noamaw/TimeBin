@@ -1,6 +1,7 @@
 package com.noam.timebin.ui
 
 import androidx.fragment.app.Fragment
+import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
 import com.noam.timebin.MainActivity
 import com.noam.timebin.ui.fragments.ServiceFragment
 import com.noam.timebin.ui.fragments.TodayFragment

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "476704254247",
+    "firebase_url": "https://time-bin.firebaseio.com",
+    "project_id": "time-bin",
+    "storage_bucket": "time-bin.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:476704254247:android:5d2b44222ab8d54dc4a102",
+        "android_client_info": {
+          "package_name": "com.noam.timebin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "476704254247-b78nimtj4rsqupd652lmr020ht6lq20n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxcqYQtIy2n-gXN7B20U4xUgm7INco6To"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "476704254247-b78nimtj4rsqupd652lmr020ht6lq20n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

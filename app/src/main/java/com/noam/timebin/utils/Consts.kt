@@ -1,6 +1,6 @@
 package com.noam.timebin.utils
 
-const val PACKAGE_NAME = "com.example.timebin"
+const val PACKAGE_NAME = "com.noam.timebin"
 const val ACTION_START_SERVICE = PACKAGE_NAME + "ACTION_START_SERVICE"
 const val ACTION_STOP_SERVICE = PACKAGE_NAME + "ACTION_STOP_SERVICE"
 const val ACTION_MAIN = PACKAGE_NAME + "ACTION_MAIN"
