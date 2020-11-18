@@ -28,6 +28,7 @@ class TimerService : Service() {
     var isServiceRunning = false
     var runningMyTimer : MyTimer = MyTimer.createDummy()
     private var updateTimer = Timer()
+    private var notification: NotificationCompat.Builder? = null
 
     private val screenStateBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -171,22 +172,24 @@ class TimerService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(resources.getString(R.string.app_name))
             .setTicker(resources.getString(R.string.app_name))
-            .setContentText("${resources.getString(R.string.my_string)}  ${convertLongToFormattedTime(runningMyTimer.calculateTimePassed())}")
             .setSmallIcon(R.drawable.my_icon)
             .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
             .setSmallIcon(R.drawable.my_icon)
-            .setWhen(System.currentTimeMillis())
             .setAutoCancel(false)
             .setColorized(true).setColor(resources.getColor(R.color.colorAccent, theme))
             .setOngoing(true)
+            .setOnlyAlertOnce(true)
             .setContentIntent(contentPendingIntent)
     }
 
     private fun updateNotification() {
-        val notification: Notification = createMyNotification().build()
+        if (notification == null) {
+            notification = createMyNotification()
+        }
+        notification?.setContentText("${resources.getString(R.string.my_string)}  ${convertLongToFormattedTime(runningMyTimer.calculateTimePassed())}")
         val mNotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        mNotificationManager.notify(NOTIFICATION_ID, notification)
+        mNotificationManager.notify(NOTIFICATION_ID, notification?.build())
     }
 
     private fun stopMyService() {
