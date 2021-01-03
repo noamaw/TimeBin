@@ -23,7 +23,7 @@ import java.util.*
 class TimerService : Service() {
     val NOTIFICATION_ID = 543
     val CHANNEL_ID = "TimeBin"
-    val SET_TIME_LENGTH = 3L
+    val SET_TIME_LENGTH = 30L
     val SET_TIME_TYPE = "minutes"
     var isServiceRunning = false
     var runningMyTimer : MyTimer = MyTimer.createDummy()
@@ -37,11 +37,11 @@ class TimerService : Service() {
                 Intent.ACTION_SCREEN_ON -> {
                     Log.d("TimerService", "action screen on")
                     val myKM = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-                    if( !myKM.isKeyguardLocked ) {
+                    if(!myKM.isKeyguardLocked) {
                         Log.d("TimerService", "action screen not locked")
                         currentTime = System.currentTimeMillis()
-                        if (!runningMyTimer.isDummy() && (currentTime - runningMyTimer.stopTime < (5 * 60 * 1000))) {
-                            runningMyTimer.addBreak(runningMyTimer.stopTime, currentTime)
+                        if (isAddingBreak(currentTime)) {
+                            runningMyTimer.addBreak(currentTime)
                             Log.d("TimerService", "time has passed ${convertLongToFormattedTime(runningMyTimer.calculateTimePassed())}")
                         }
                         scheduleTimerThread()
@@ -57,8 +57,8 @@ class TimerService : Service() {
                 Intent.ACTION_USER_PRESENT -> {
                     Log.d("TimerService", "action user present")
                     currentTime = System.currentTimeMillis()
-                    if (!runningMyTimer.isDummy() && (currentTime - runningMyTimer.stopTime < (5 * 60 * 1000))) {
-                        runningMyTimer.addBreak(runningMyTimer.stopTime, currentTime)
+                    if (isAddingBreak(currentTime)) {
+                        runningMyTimer.addBreak(currentTime)
                         Log.d("TimerService", "time has passed ${convertLongToFormattedTime(runningMyTimer.calculateTimePassed())}")
                     } else {
                         createNewTimer(currentTime)
@@ -73,6 +73,11 @@ class TimerService : Service() {
                     sendMessageToActivity()
                 }
             }
+        }
+
+        private fun isAddingBreak(currentTime: Long): Boolean {
+            val FIVE_MINUTES = 5 * 60 * 1000
+            return !runningMyTimer.isDummy() && (currentTime - runningMyTimer.stopTime < FIVE_MINUTES)
         }
 
     }

@@ -6,20 +6,24 @@ data class MyTimer(
     var stopTime: Long = startTime) {
 
     private val breaks : MutableList<Break> = mutableListOf()
+    private var totalTime : Long = -1L
 
     fun stop(stopTime: Long) {
-        this.stopTime = stopTime
-        isCurrentlyRunning = false
+        if (isCurrentlyRunning) {
+            this.stopTime = stopTime
+            isCurrentlyRunning = false
+        }
     }
 
     fun finish() {
         if (breaks.isNotEmpty()) {
-            stopTime = breaks.last().endTime
+//            stopTime = breaks.last().endTime
         }
+        totalTime = calculateTimePassed()
     }
 
-    fun addBreak(startTime: Long, endTime: Long) {
-        breaks.add(Break(startTime, endTime))
+    fun addBreak(endTime: Long) {
+        breaks.add(Break(stopTime, endTime))
         isCurrentlyRunning = true
         stopTime = endTime
     }
@@ -27,6 +31,9 @@ data class MyTimer(
     fun isDummy() : Boolean { return startTime == 0L }
 
     fun calculateTimePassed() : Long {
+        if (totalTime > 0L) {
+            return totalTime
+        }
         var totalTimePassed = when {
             isDummy() -> { 0L }
             isCurrentlyRunning -> { System.currentTimeMillis() - startTime }
