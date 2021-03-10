@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tabsViewPager : ViewPager2
     private lateinit var tabsPageChangeCallback : ViewPager2.OnPageChangeCallback
+//    private lateinit var myViewModel: MyViewModel
 
     private val mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -36,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+//        myViewModel = ViewModelProvider(this).get(MyViewModel::class.java)
+//        setObserving()
         TimeBinApplication.isActivityRunning = true
         sendRequestIntent()
 
@@ -43,6 +46,12 @@ class MainActivity : AppCompatActivity() {
             mMessageReceiver, IntentFilter(ACTION_SERVICE_TO_ACTIVITY))
 
         setViewPager()
+    }
+
+    private fun setObserving() {
+//        myViewModel.getTimers()?.observe(this, Observer<List<MyTimer?>?> {
+//            "Not yet implemented"
+//        })
     }
 
     private fun setViewPager() {

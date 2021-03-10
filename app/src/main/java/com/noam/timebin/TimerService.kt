@@ -1,4 +1,4 @@
-package com.noam.timebin
+ package com.noam.timebin
 
 import android.app.*
 import android.content.BroadcastReceiver
@@ -15,18 +15,25 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.noam.timebin.model.MyTimer
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
+import com.noam.timebin.model.TimerData
 import com.noam.timebin.utils.*
+import com.noam.timebin.work_manager.MyWorker
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.*
-
+import java.util.concurrent.TimeUnit
 
 class TimerService : Service() {
+    private val TAG: String = "TimerService"
     val NOTIFICATION_ID = 543
     val CHANNEL_ID = "TimeBin"
     val SET_TIME_LENGTH = 30L
     val SET_TIME_TYPE = "minutes"
     var isServiceRunning = false
-    var runningMyTimer : MyTimer = MyTimer.createDummy()
     private var updateTimer = Timer()
     private var notification: NotificationCompat.Builder? = null
 
@@ -37,12 +44,18 @@ class TimerService : Service() {
                 Intent.ACTION_SCREEN_ON -> {
                     Log.d("TimerService", "action screen on")
                     val myKM = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-                    if(!myKM.isKeyguardLocked) {
+                    if (!myKM.isKeyguardLocked) {
                         Log.d("TimerService", "action screen not locked")
                         currentTime = System.currentTimeMillis()
-                        if (isAddingBreak(currentTime)) {
-                            runningMyTimer.addBreak(currentTime)
-                            Log.d("TimerService", "time has passed ${convertLongToFormattedTime(runningMyTimer.calculateTimePassed())}")
+                        if (TimerData.shouldAddBreak(currentTime)) {
+                            TimerData.addBreak(currentTime)
+                            Log.d(
+                                "TimerService", "time has passed ${
+                                    convertLongToFormattedTime(
+                                        TimerData.getCurrentTimerTime()
+                                    )
+                                }"
+                            )
                         }
                         scheduleTimerThread()
                     }
@@ -50,16 +63,29 @@ class TimerService : Service() {
                 Intent.ACTION_SCREEN_OFF -> {
                     Log.d("TimerService", "action screen off")
                     currentTime = System.currentTimeMillis()
-                    runningMyTimer.stop(currentTime)
-                    Log.d("TimerService", "time has passed ${convertLongToFormattedTime(runningMyTimer.calculateTimePassed())}")
+                    TimerData.stop(currentTime)
+                    Log.d(
+                        "TimerService", "time has passed ${
+                            convertLongToFormattedTime(
+                                    TimerData.getCurrentTimerTime()
+                            )
+                        }"
+                    )
                     cancelTimerThread()
                 }
                 Intent.ACTION_USER_PRESENT -> {
                     Log.d("TimerService", "action user present")
+                    TimeBinApplication.logger.log("g", "action user present")
                     currentTime = System.currentTimeMillis()
-                    if (isAddingBreak(currentTime)) {
-                        runningMyTimer.addBreak(currentTime)
-                        Log.d("TimerService", "time has passed ${convertLongToFormattedTime(runningMyTimer.calculateTimePassed())}")
+                    if (TimerData.shouldAddBreak(currentTime)) {
+                        TimerData.addBreak(currentTime)
+                        Log.d(
+                            "TimerService", "time has passed ${
+                                convertLongToFormattedTime(
+                                    TimerData.getCurrentTimerTime()
+                                )
+                            }"
+                        )
                     } else {
                         createNewTimer(currentTime)
                         Log.d("TimerService", "creating new timer")
@@ -75,18 +101,10 @@ class TimerService : Service() {
             }
         }
 
-        private fun isAddingBreak(currentTime: Long): Boolean {
-            val FIVE_MINUTES = 5 * 60 * 1000
-            return !runningMyTimer.isDummy() && (currentTime - runningMyTimer.stopTime < FIVE_MINUTES)
-        }
-
     }
 
     private fun createNewTimer(currentTime: Long) {
-        if (!runningMyTimer.isDummy()) {
-            TimeBinApplication.addToTimers(runningMyTimer.copy())
-        }
-        runningMyTimer = MyTimer(currentTime)
+        TimerData.createNewTimer(currentTime)
     }
 
     override fun onCreate() {
@@ -103,11 +121,12 @@ class TimerService : Service() {
         screenStateFilter.addAction(Intent.ACTION_USER_PRESENT)
         screenStateFilter.addAction(ACTION_REQUEST_TIME_PASSED)
         registerReceiver(screenStateBroadcastReceiver, screenStateFilter,null, handler)
+        scheduleEndOfDayWork()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("TimerService", "onStartCommand called")
-        val r: Runnable = Runnable {
+        val r = Runnable {
             when {
                 intent != null && intent.action == ACTION_START_SERVICE -> {
                     startServiceWithNotification()
@@ -173,7 +192,12 @@ class TimerService : Service() {
         notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         val contentPendingIntent =
-            PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getActivity(
+                this,
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(resources.getString(R.string.app_name))
             .setTicker(resources.getString(R.string.app_name))
@@ -191,13 +215,21 @@ class TimerService : Service() {
         if (notification == null) {
             notification = createMyNotification()
         }
-        notification?.setContentText("${resources.getString(R.string.my_string)}  ${convertLongToFormattedTime(runningMyTimer.calculateTimePassed())}")
+        notification?.setContentText(
+            "${resources.getString(R.string.my_string)}  ${
+                convertLongToFormattedTime(
+                    TimerData.getCurrentTimerTime()
+                )
+            }"
+        )
         val mNotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager.notify(NOTIFICATION_ID, notification?.build())
     }
 
     private fun stopMyService() {
+        TimerData.stop(System.currentTimeMillis())
+        cancelTimerThread()
         stopForeground(true)
         stopSelf()
         isServiceRunning = false
@@ -208,7 +240,7 @@ class TimerService : Service() {
         if (TimeBinApplication.isActivityRunning) {
             val intent = Intent(ACTION_SERVICE_TO_ACTIVITY)
             // You can also include some extra data.
-            intent.putExtra(EXTRA_TIME_PASSED, runningMyTimer.calculateTimePassed())
+            intent.putExtra(EXTRA_TIME_PASSED, TimerData.getCurrentTimerTime())
             LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
         }
     }
@@ -217,8 +249,6 @@ class TimerService : Service() {
         updateTimer = Timer()
         updateTimer.schedule(object : TimerTask() {
             override fun run() {
-//                val timePassed: Long = runningMyTimer.calculateTimePassed()
-//                val diff = convertLongToFormattedTime(timePassed)
                 updateNotification()
                 sendMessageToActivity()
             }
@@ -229,7 +259,7 @@ class TimerService : Service() {
     private fun setAlertForUser() {
         updateTimer.schedule(object : TimerTask() {
             override fun run() {
-                if (getUserSetTimeLength() - runningMyTimer.calculateTimePassed() > 3) {
+                if (getUserSetTimeLength() - TimerData.getCurrentTimerTime() > 3) {
                     setAlertForUser()
                 } else {
                     alertUser()
@@ -239,7 +269,7 @@ class TimerService : Service() {
     }
 
     private fun getNextAlertDelay() : Long {
-        val delay = getUserSetTimeLength() - runningMyTimer.calculateTimePassed()
+        val delay = getUserSetTimeLength() - TimerData.getCurrentTimerTime()
         return when {
              delay > 0 -> {
                 delay
@@ -272,5 +302,31 @@ class TimerService : Service() {
         val mNotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         mNotificationManager.notify(NOTIFICATION_ID + 2, notification)
+    }
+
+    private fun scheduleEndOfDayWork() {
+        val today: LocalDateTime = LocalDateTime.now()
+        val tomorrow = today.with(LocalTime.MAX).plusMinutes(1)
+        val delay: Long = Duration.between(today, tomorrow).toMinutes()
+        Log.d(TAG, "scheduling end of day work for another $delay minutes til it is $tomorrow.")
+
+        val workRequest = PeriodicWorkRequest.Builder(
+                MyWorker::class.java,
+                24,
+                TimeUnit.HOURS,
+                PeriodicWorkRequest.MIN_PERIODIC_FLEX_MILLIS,
+                TimeUnit.MILLISECONDS
+        )
+                .setInitialDelay(delay, TimeUnit.MINUTES)
+                .addTag("send_reminder_periodic")
+                .build()
+
+
+        WorkManager.getInstance(applicationContext)
+                .enqueueUniquePeriodicWork(
+                        "send_reminder_periodic",
+                        ExistingPeriodicWorkPolicy.REPLACE,
+                        workRequest
+                )
     }
 }
