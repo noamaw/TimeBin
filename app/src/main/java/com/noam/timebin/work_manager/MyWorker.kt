@@ -12,12 +12,12 @@ class MyWorker(context: Context, workerParams: WorkerParameters) : Worker(contex
     override fun doWork(): Result {
         // Do the work here
         Log.d("MyWorker", "doing the work of the end of the day")
-        TimeBinApplication.logger.createFile()
         TimeBinApplication.logger.log("", "starting end of day work")
         val endDayWork = EndDayWork(applicationContext)
         TimeBinApplication.logger.log("", "doing end of day work")
         endDayWork.doEndOfDayWork()
         TimeBinApplication.logger.log("", "finished end of day work")
+        TimeBinApplication.logger.createFile()
         // Indicate success or failure with your return value:
         return Result.success()
 

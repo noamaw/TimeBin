@@ -12,6 +12,7 @@ class Logger(context: Context) {
     var logFile : File
     private val appDirectory: File =  File(context.getExternalFilesDir(null), "logs")
     private val logDirectory: File
+    private var increment = 0
 
     init {
         logDirectory = File("$appDirectory")
@@ -39,7 +40,7 @@ class Logger(context: Context) {
             Log.d(TAG, "creating the dir")
         }
 
-        val fileNameTimeStamp = "${SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())}"
+        val fileNameTimeStamp = "${SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())}_${increment++}"
 
         val fileName = "$fileNameTimeStamp.html"
         val file = File(direct.absolutePath + File.separator + fileName)
